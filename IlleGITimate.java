@@ -13,9 +13,18 @@ public class IlleGITimate {
     // This is the index file
     private File index;
 
+    /*
+     * If the repository already exists, this implementation will not overwrite anything 
+     */
     public IlleGITimate() throws IOException {
-        this.initializePaths();
-        this.initializeRepository();
+        initializePaths();
+
+        if (isRepositoryHealthy()) {
+            System.out.println("Git Repository Already Exists");
+        }
+        else {
+            initializeRepository();
+        }
     }
 
     /*
@@ -27,32 +36,27 @@ public class IlleGITimate {
      */
     public IlleGITimate(String pathname) throws IOException {
         this.pathname = pathname + "/";
-        this.initializePaths();
-        this.initializeRepository();
+        initializePaths();
+
+        if (isRepositoryHealthy()) {
+            System.out.println("Git Repository Already Exists");
+        }
+        else {
+            initializeRepository();
+        }
     }
 
-    // Initializes git, objects, and index if they don't already exist
-    private boolean initializeRepository() throws IOException {
-        boolean wasAnythingCreated = false;
-
+    // Initializes git, objects, and index.
+    private void initializeRepository() throws IOException {
         if (!gitExists()) {
             git.mkdir();
-            wasAnythingCreated = true;
         }
         if (!objectsExists()) {
             objects.mkdir();
-            wasAnythingCreated = true;
         }
         if (!indexExists()) {
             index.createNewFile();
-            wasAnythingCreated = true;
         }
-
-        if (!wasAnythingCreated) {
-            System.out.println("Git Repository Already Exists");
-        }
-
-        return wasAnythingCreated;
     }
 
     /*
@@ -70,11 +74,12 @@ public class IlleGITimate {
     /*
      * Returns the path of what
      */
-    public boolean remove
+    // public boolean remove
 
     /*
      * Checks to see if all the components of the repository exist. If any of them
-     * do not, then returns false, meaning the repository is unhealthy.
+     * do not, then this method returns false, indicating the repository is
+     * unhealthy.
      */
     public boolean isRepositoryHealthy() {
         return gitExists() && objectsExists() && indexExists();
