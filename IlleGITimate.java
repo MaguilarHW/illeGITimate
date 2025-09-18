@@ -3,9 +3,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.file.Files;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -20,17 +19,17 @@ public class IlleGITimate {
     private File objects;
 
     /*
-     * This is an HashSet of all the files that are in the objects directory.
+     * This is an HashMap of all the files that are in the objects directory.
      * Specifically, it contains the paths of all the added Files. Since I don't
      * know of a way to have objects be anything except a placeholder (I can't have
      * it actually point to files), I will need this to look up whether a file
-     * exists and occasionally to rebuild the index if something bad happens.
-     * Conversely, index can be used to rebuild this data.
+     * exists and it helps me not have to repeatedly iterate over the index when I
+     * can just initialize this and iterate through it for all my needs.
      * 
-     * To traverse all the files outside of git, simply iterate. To traverse them
-     * all within git, hash and then iterate.
+     * TLDR: HashMap that represents index
+     * REMEMBER: <unique hash, file path>
      */
-    private HashSet<File> unhashedPathsToStoredFiles = new HashSet<File>();
+    private HashMap<String, File> storedFiles = new HashMap<String, File>();
 
     // This is the index file
     private File index;
@@ -49,7 +48,7 @@ public class IlleGITimate {
             initializeRepository();
         }
 
-        initializeUnhashedPathsToStoredFiles();
+        initializeStoredFilesFromIndex();
     }
 
     /*
@@ -69,7 +68,7 @@ public class IlleGITimate {
             initializeRepository();
         }
 
-        initializeUnhashedPathsToStoredFiles();
+        initializeStoredFilesFromIndex();
     }
 
     // METHODS
@@ -123,21 +122,24 @@ public class IlleGITimate {
      * allows the HashSet to be filled with Files using the data within index. 41 is
      * the length of the hash.
      */
-    private void initializeUnhashedPathsToStoredFiles() throws IOException {
+    private void initializeStoredFilesFromIndex() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
+            String hash = line.substring(0, 42);
             String pathname = line.substring(41, line.length());
-            unhashedPathsToStoredFiles.add(new File(pathname));
+            storedFiles.put(hash, new File(pathname));
         }
         br.close();
     }
 
     /*
-     * Checks the contents of a file against the contents of all files within 
+     * Checks the contents of a file against the contents of all files within the
+     * objects directory to see whether saving it is necessary. If the file contents
+     * are found, we will not add it. Regardless, both will enter the index.
      */
-    private boolean isFileAlreadyInObjects(File file) {
-        
+    private boolean areFileContentsAlreadyInObjects(File file) throws IOException {
+        return storedFiles.containsKey(generateSha1Hex(file));
     }
 
     // Initializes git, objects, and index.
@@ -187,8 +189,9 @@ public class IlleGITimate {
 
     // TODO: here, we need to hash before iterating
     public boolean deleteObjects() {
-        for (File file : unhashedPathsToStoredFiles) {
-            file.delete();
+        for (String hash : storedFiles.keySet()) {
+            File temp = new File(objects.getPath() + "/" + hash);
+            temp.delete();
         }
         return objects.delete();
     }
