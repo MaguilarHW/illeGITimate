@@ -12,6 +12,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 public class IlleGITimate {
 
+    private boolean compress = false;
+
     // Using String instead of Path because of empty behavior
     private String pathname = "";
 
