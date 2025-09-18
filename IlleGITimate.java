@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
@@ -26,10 +27,16 @@ public class IlleGITimate {
      * exists and it helps me not have to repeatedly iterate over the index when I
      * can just initialize this and iterate through it for all my needs.
      * 
-     * TLDR: HashMap that represents index
-     * REMEMBER: <unique hash, file path>
+     * TLDR: storedFiles is a HashMap that represents index that will be tinkered
+     * with at run-time and the result will be written back to index
+     * 
+     * REMEMBER: <path, unique hash> since an index can only hold a path once,
+     * whereas it can hold the same hash many times
+     * 
+     * could always refactor the hash to be an IndexEntry or some other custom
+     * object...
      */
-    private HashMap<String, File> storedFiles = new HashMap<String, File>();
+    private HashMap<String, String> storedFiles = new HashMap<String, String>();
 
     // This is the index file
     private File index;
@@ -73,13 +80,6 @@ public class IlleGITimate {
 
     // METHODS
 
-    public void commitFile(File file) throws IOException {
-        String sha1Hex = generateSha1Hex(file);
-        String pathname = file.getPath();
-
-        writeFileToIndex(file);
-    }
-
     /*
      * Using apache library, which is gitignored. If this is not working for
      * someone, download the jar files from Google
@@ -88,9 +88,72 @@ public class IlleGITimate {
         return DigestUtils.sha1Hex(Files.readString(file.toPath()));
     }
 
-    private void writeFileToIndex(File file) throws IOException {
+    /*
+     * The way I understand it, there are four scenarios when saving files using
+     * git:
+     * 
+     * 1: The file has the same path and hash as a pair in storedFiles. Then it is
+     * identical to that file and should not be stored.
+     * 
+     * 2: The file only shares a hash with something stored in storedFiles. Then the
+     * contents are identical and storedFiles should be updated. Index should be
+     * rewritten after.
+     * 
+     * 3: The file only shares a path with something stored in storedFiles. Then it
+     * was a file that had been changed. We put these in just
+     * objects and update the index by replacing the old entry.
+     * 
+     * 4: It shares nothing in common, it goes in both index and objects.
+     * 
+     * Note that 2, 3, 4 both involve rewriting the hashMap, which can be done in
+     * one method since "put"ing also overwrites in a hashMap.
+     */
+    public void commitFile(File file) throws IOException {
+        String hash = generateSha1Hex(file);
+        String pathname = file.getPath();
+
+        // Case 1:
+        if (storedFiles.containsKey(pathname) && storedFiles.get(pathname).equals(hash)) {
+            return;
+        }
+
+        // Cases 2, 3, 4:
+        addFileToStoredFiles(file);
+        saveFileToObjectsDirectory(file);
+
+        // instead of trying to deal with in-place edits, just rewrite the entire index
+        // every time we commit a file. could probably do this better tbh
+        initializeIndexFromStoredFiles();
+    }
+
+    private void saveFileToObjectsDirectory(File file) throws IOException {
+        String hash = generateSha1Hex(file);
+        File objectsFile = new File(objects.getPath() + "/" + hash);
+
+        // logic to copy stuff from file to objectsFile
+        // sleek!
+        FileOutputStream fos = new FileOutputStream(objectsFile);
+        Files.copy(file.toPath(), fos);
+        fos.close();
+    }
+
+    /*
+     * Rebuilds the index from the storedFiles memory copy. This is done after every
+     * commit
+     */
+    private void initializeIndexFromStoredFiles() throws IOException {
+        // Erases and rebirths the index file
+        index.delete();
+        index.createNewFile();
+
+        for (String pathname : storedFiles.keySet()) {
+            appendFileToIndex(new File(pathname));
+        }
+    }
+
+    private void appendFileToIndex(File file) throws IOException {
         // TODO: should probably check if index exists here
-        String sha1Hex = generateSha1Hex(file);
+        String hash = generateSha1Hex(file);
         String pathname = file.getPath();
 
         // True means the FileWriter is appending the text
@@ -101,8 +164,12 @@ public class IlleGITimate {
             bw.newLine();
         }
 
-        bw.write(sha1Hex + " " + pathname);
+        bw.write(hash + " " + pathname);
         bw.close();
+    }
+
+    private void addFileToStoredFiles(File file) throws IOException {
+        storedFiles.put(file.getPath(), generateSha1Hex(file));
     }
 
     /*
@@ -126,20 +193,11 @@ public class IlleGITimate {
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
-            String hash = line.substring(0, 42);
+            String hash = line.substring(0, 40);
             String pathname = line.substring(41, line.length());
-            storedFiles.put(hash, new File(pathname));
+            storedFiles.put(pathname, hash);
         }
         br.close();
-    }
-
-    /*
-     * Checks the contents of a file against the contents of all files within the
-     * objects directory to see whether saving it is necessary. If the file contents
-     * are found, we will not add it. Regardless, both will enter the index.
-     */
-    private boolean areFileContentsAlreadyInObjects(File file) throws IOException {
-        return storedFiles.containsKey(generateSha1Hex(file));
     }
 
     // Initializes git, objects, and index.
@@ -187,9 +245,8 @@ public class IlleGITimate {
      * deleting the directory objects.
      */
 
-    // TODO: here, we need to hash before iterating
     public boolean deleteObjects() {
-        for (String hash : storedFiles.keySet()) {
+        for (String hash : storedFiles.values()) {
             File temp = new File(objects.getPath() + "/" + hash);
             temp.delete();
         }
