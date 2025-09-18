@@ -1,6 +1,13 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashSet;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 public class IlleGITimate {
@@ -23,7 +30,7 @@ public class IlleGITimate {
      * To traverse all the files outside of git, simply iterate. To traverse them
      * all within git, hash and then iterate.
      */
-    private HashSet<File> unhashedPathsToFiles = new HashSet<File>();
+    private HashSet<File> unhashedPathsToStoredFiles = new HashSet<File>();
 
     // This is the index file
     private File index;
@@ -41,6 +48,8 @@ public class IlleGITimate {
         } else {
             initializeRepository();
         }
+
+        initializeUnhashedPathsToStoredFiles();
     }
 
     /*
@@ -59,12 +68,42 @@ public class IlleGITimate {
         } else {
             initializeRepository();
         }
+
+        initializeUnhashedPathsToStoredFiles();
     }
 
     // METHODS
 
     public void commitFile(File file) throws IOException {
+        String sha1Hex = generateSha1Hex(file);
+        String pathname = file.getPath();
 
+        writeFileToIndex(file);
+    }
+
+    /*
+     * Using apache library, which is gitignored. If this is not working for
+     * someone, download the jar files from Google
+     */
+    private String generateSha1Hex(File file) throws IOException {
+        return DigestUtils.sha1Hex(Files.readString(file.toPath()));
+    }
+
+    private void writeFileToIndex(File file) throws IOException {
+        // TODO: should probably check if index exists here
+        String sha1Hex = generateSha1Hex(file);
+        String pathname = file.getPath();
+
+        // True means the FileWriter is appending the text
+        BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
+
+        // First line doesn't need a new line, subsequent edits do
+        if (!Files.readString(index.toPath()).isEmpty()) {
+            bw.newLine();
+        }
+
+        bw.write(sha1Hex + " " + pathname);
+        bw.close();
     }
 
     /*
@@ -77,6 +116,28 @@ public class IlleGITimate {
         git = new File(pathname + "git");
         objects = new File(pathname + "git/objects");
         index = new File(pathname + "git/index");
+    }
+
+    /*
+     * This is useful when running the program when an index already exists. This
+     * allows the HashSet to be filled with Files using the data within index. 41 is
+     * the length of the hash.
+     */
+    private void initializeUnhashedPathsToStoredFiles() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(index));
+        while (br.ready()) {
+            String line = br.readLine();
+            String pathname = line.substring(41, line.length());
+            unhashedPathsToStoredFiles.add(new File(pathname));
+        }
+        br.close();
+    }
+
+    /*
+     * Checks the contents of a file against the contents of all files within 
+     */
+    private boolean isFileAlreadyInObjects(File file) {
+        
     }
 
     // Initializes git, objects, and index.
@@ -126,7 +187,7 @@ public class IlleGITimate {
 
     // TODO: here, we need to hash before iterating
     public boolean deleteObjects() {
-        for (File file : unhashedPathsToFiles) {
+        for (File file : unhashedPathsToStoredFiles) {
             file.delete();
         }
         return objects.delete();
