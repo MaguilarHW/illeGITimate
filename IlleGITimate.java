@@ -23,11 +23,10 @@ public class IlleGITimate {
 
     /*
      * This is an HashMap of all the files that are in the objects directory.
-     * Specifically, it contains the paths of all the added Files. Since I don't
-     * know of a way to have objects be anything except a placeholder (I can't have
-     * it actually point to files), I will need this to look up whether a file
-     * exists and it helps me not have to repeatedly iterate over the index when I
-     * can just initialize this and iterate through it for all my needs.
+     * Specifically, it contains the paths of all the added Files. I want this to
+     * have an easy way of looking up whether a file exists (with good efficiency)
+     * and it helps me not have to repeatedly iterate over the index when I can just
+     * initialize this and iterate through it for all my needs.
      * 
      * TLDR: storedFiles is a HashMap that represents index that will be tinkered
      * with at run-time and the result will be written back to index
@@ -243,14 +242,11 @@ public class IlleGITimate {
     /*
      * Objects is a directory containing many files. Java can only delete the
      * directory if it is empty, thus this method deletes everything within objects
-     * (by accessing every file in the ArrayList hashedObjects) first before finally
-     * deleting the directory objects.
+     * first before finally deleting the directory objects.
      */
-
     public boolean deleteObjects() {
-        for (String hash : storedFiles.values()) {
-            File temp = new File(objects.getPath() + "/" + hash);
-            temp.delete();
+        for (File file : objects.listFiles()) {
+            file.delete();
         }
         return objects.delete();
     }
@@ -278,5 +274,12 @@ public class IlleGITimate {
 
     public boolean indexExists() {
         return index.exists();
+    }
+
+    public void clearRepositoryForTestingPurposes() throws IOException {
+        index.delete();
+        index.createNewFile();
+        deleteObjects();
+        objects.mkdir();
     }
 }
