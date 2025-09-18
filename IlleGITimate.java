@@ -1,6 +1,7 @@
 import java.io.File;
 import java.util.HashSet;
 import java.io.IOException;
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class IlleGITimate {
 
@@ -12,17 +13,22 @@ public class IlleGITimate {
     private File objects;
 
     /*
-     * This is an HashSet of all the files that are in the objects directory. Since
-     * I don't know of a way to have objects be anything except a placeholder (I
-     * can't have it actually point to files), I will need this to look up whether a
-     * file exists and occasionally to rebuild the index if something bad happens...
-     * Got the idea after thinking about time complexity and looking at
-     * StackOverflow
+     * This is an HashSet of all the files that are in the objects directory.
+     * Specifically, it contains the paths of all the added Files. Since I don't
+     * know of a way to have objects be anything except a placeholder (I can't have
+     * it actually point to files), I will need this to look up whether a file
+     * exists and occasionally to rebuild the index if something bad happens.
+     * Conversely, index can be used to rebuild this data.
+     * 
+     * To traverse all the files outside of git, simply iterate. To traverse them
+     * all within git, hash and then iterate.
      */
-    private HashSet<File> hashedObjects = new HashSet<File>();
+    private HashSet<File> unhashedPathsToFiles = new HashSet<File>();
 
     // This is the index file
     private File index;
+
+    // CONSTRUCTORS
 
     /*
      * If the repository already exists, this will not overwrite anything
@@ -55,17 +61,10 @@ public class IlleGITimate {
         }
     }
 
-    // Initializes git, objects, and index.
-    private void initializeRepository() throws IOException {
-        if (!gitExists()) {
-            git.mkdir();
-        }
-        if (!objectsExists()) {
-            objects.mkdir();
-        }
-        if (!indexExists()) {
-            index.createNewFile();
-        }
+    // METHODS
+
+    public void commitFile(File file) throws IOException {
+
     }
 
     /*
@@ -78,6 +77,19 @@ public class IlleGITimate {
         git = new File(pathname + "git");
         objects = new File(pathname + "git/objects");
         index = new File(pathname + "git/index");
+    }
+
+    // Initializes git, objects, and index.
+    private void initializeRepository() throws IOException {
+        if (!gitExists()) {
+            git.mkdir();
+        }
+        if (!objectsExists()) {
+            objects.mkdir();
+        }
+        if (!indexExists()) {
+            index.createNewFile();
+        }
     }
 
     /*
@@ -111,8 +123,10 @@ public class IlleGITimate {
      * (by accessing every file in the ArrayList hashedObjects) first before finally
      * deleting the directory objects.
      */
+
+    // TODO: here, we need to hash before iterating
     public boolean deleteObjects() {
-        for (File file : hashedObjects) {
+        for (File file : unhashedPathsToFiles) {
             file.delete();
         }
         return objects.delete();
