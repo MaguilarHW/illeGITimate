@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.HashSet;
 import java.io.IOException;
 
 public class IlleGITimate {
@@ -10,19 +11,28 @@ public class IlleGITimate {
     private File git;
     private File objects;
 
+    /*
+     * This is an HashSet of all the files that are in the objects directory. Since
+     * I don't know of a way to have objects be anything except a placeholder (I
+     * can't have it actually point to files), I will need this to look up whether a
+     * file exists and occasionally to rebuild the index if something bad happens...
+     * Got the idea after thinking about time complexity and looking at
+     * StackOverflow
+     */
+    private HashSet<File> hashedObjects = new HashSet<File>();
+
     // This is the index file
     private File index;
 
     /*
-     * If the repository already exists, this implementation will not overwrite anything 
+     * If the repository already exists, this will not overwrite anything
      */
     public IlleGITimate() throws IOException {
         initializePaths();
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
-        }
-        else {
+        } else {
             initializeRepository();
         }
     }
@@ -40,8 +50,7 @@ public class IlleGITimate {
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
-        }
-        else {
+        } else {
             initializeRepository();
         }
     }
@@ -72,9 +81,46 @@ public class IlleGITimate {
     }
 
     /*
-     * Returns the path of what
+     * Tries to delete git, objects, and index and everything contained within.
+     * Everything within objects (and then index) must be deleted first, since
+     * directories can only be deleted by Java if they are empty.
      */
-    // public boolean remove
+    public boolean deleteRepository() {
+        deleteIndex();
+        deleteObjects();
+        return deleteGit();
+    }
+
+    /*
+     * Git is a directory containing objects. Objects must therefore be deleted
+     * first. One might want to change this implementation later to handle the edge
+     * case where git does not exist but objects and index do, whereby objects would
+     * need to be moved within git...
+     * 
+     * Honestly, this is the same thing as deleteRepository. At least for now...
+     */
+    public boolean deleteGit() {
+        deleteIndex();
+        deleteObjects();
+        return git.delete();
+    }
+
+    /*
+     * Objects is a directory containing many files. Java can only delete the
+     * directory if it is empty, thus this method deletes everything within objects
+     * (by accessing every file in the ArrayList hashedObjects) first before finally
+     * deleting the directory objects.
+     */
+    public boolean deleteObjects() {
+        for (File file : hashedObjects) {
+            file.delete();
+        }
+        return objects.delete();
+    }
+
+    public boolean deleteIndex() {
+        return index.delete();
+    }
 
     /*
      * Checks to see if all the components of the repository exist. If any of them
