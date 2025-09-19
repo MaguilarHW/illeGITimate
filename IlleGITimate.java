@@ -55,6 +55,7 @@ public class IlleGITimate {
             System.out.println("Git Repository Already Exists");
         } else {
             initializeRepository();
+            System.out.println("Git Repository Created");
         }
 
         initializeStoredFilesFromIndex();
@@ -75,6 +76,7 @@ public class IlleGITimate {
             System.out.println("Git Repository Already Exists");
         } else {
             initializeRepository();
+            System.out.println("Git Repository Created");
         }
 
         initializeStoredFilesFromIndex();
@@ -128,7 +130,7 @@ public class IlleGITimate {
         initializeIndexFromStoredFiles();
     }
 
-    //TODO: rename it create blob
+    // This makes the BLOB
     private void saveFileToObjectsDirectory(File file) throws IOException {
         String hash = generateSha1Hex(file);
         File objectsFile = new File(objects.getPath() + "/" + hash);
@@ -282,21 +284,24 @@ public class IlleGITimate {
         return index.exists();
     }
 
-    // // Stretch Goal #2: Create a tester for blob creation and **verification** (7%)
+    // // Stretch Goal #2: Create a tester for blob creation and **verification**
+    // (7%)
     // // Blob creation is handled using saveFileToObjectsDirectory()
-    // public boolean verifySyncBetweenIndexAndObjectsDirectory() throws IOException {
-    //     // Verifying sync means AT LEAST every file in index is in git/objects/
-    //     // Maybe this isn't good
-    //     initializeStoredFilesFromIndex();
+    // public boolean verifySyncBetweenIndexAndObjectsDirectory() throws IOException
+    // {
+    // // Verifying sync means AT LEAST every file in index is in git/objects/
+    // // Maybe this isn't good
+    // initializeStoredFilesFromIndex();
 
-    //     List<File> filesInObjects = Arrays.asList(objects.listFiles());
-        
-    //     for (String hash : storedFiles.values()) {
-    //         System.out.println("Checking existence of " + objects.getAbsolutePath() + "/" + hash);
-    //         if (filesInObjects.contains(filesInObjects)) {
-                
-    //         }
-    //     }
+    // List<File> filesInObjects = Arrays.asList(objects.listFiles());
+
+    // for (String hash : storedFiles.values()) {
+    // System.out.println("Checking existence of " + objects.getAbsolutePath() + "/"
+    // + hash);
+    // if (filesInObjects.contains(filesInObjects)) {
+
+    // }
+    // }
     // }
 
     // Stretch Goal #2: Include a way to reset test files (3%)
