@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -32,7 +33,7 @@ public class IlleGITimate {
      * with at run-time and the result will be written back to index
      * 
      * REMEMBER: <path, unique hash> since an index can only hold a path once,
-     * whereas it can hold the same hash many times
+     * whereas an index can hold the same hash many times
      * 
      * could always refactor the hash to be an IndexEntry or some other custom
      * object...
@@ -127,6 +128,7 @@ public class IlleGITimate {
         initializeIndexFromStoredFiles();
     }
 
+    //TODO: rename it create blob
     private void saveFileToObjectsDirectory(File file) throws IOException {
         String hash = generateSha1Hex(file);
         File objectsFile = new File(objects.getPath() + "/" + hash);
@@ -153,7 +155,11 @@ public class IlleGITimate {
     }
 
     private void appendFileToIndex(File file) throws IOException {
-        // TODO: should probably check if index exists here
+        // Checking if index exists
+        if (!indexExists()) {
+            throw new FileNotFoundException("appendFileToIndex(File file): Index file does not exist");
+        }
+
         String hash = generateSha1Hex(file);
         String pathname = file.getPath();
 
@@ -276,6 +282,24 @@ public class IlleGITimate {
         return index.exists();
     }
 
+    // // Stretch Goal #2: Create a tester for blob creation and **verification** (7%)
+    // // Blob creation is handled using saveFileToObjectsDirectory()
+    // public boolean verifySyncBetweenIndexAndObjectsDirectory() throws IOException {
+    //     // Verifying sync means AT LEAST every file in index is in git/objects/
+    //     // Maybe this isn't good
+    //     initializeStoredFilesFromIndex();
+
+    //     List<File> filesInObjects = Arrays.asList(objects.listFiles());
+        
+    //     for (String hash : storedFiles.values()) {
+    //         System.out.println("Checking existence of " + objects.getAbsolutePath() + "/" + hash);
+    //         if (filesInObjects.contains(filesInObjects)) {
+                
+    //         }
+    //     }
+    // }
+
+    // Stretch Goal #2: Include a way to reset test files (3%)
     public void clearRepositoryForTestingPurposes() throws IOException {
         index.delete();
         index.createNewFile();
