@@ -40,8 +40,9 @@ public class IlleGITimate {
      */
     private HashMap<String, String> storedFiles = new HashMap<String, String>();
 
-    // This is the index file
+    // These are files
     private File index;
+    private File HEAD;
 
     // CONSTRUCTORS
 
@@ -191,6 +192,7 @@ public class IlleGITimate {
         git = new File(pathname + "git");
         objects = new File(pathname + "git/objects");
         index = new File(pathname + "git/index");
+        HEAD = new File(pathname + "git/HEAD");
     }
 
     /*
@@ -220,6 +222,9 @@ public class IlleGITimate {
         if (!indexExists()) {
             index.createNewFile();
         }
+        if (!headExists()) {
+            HEAD.createNewFile();
+        }
     }
 
     /*
@@ -230,6 +235,7 @@ public class IlleGITimate {
     public boolean deleteRepository() {
         deleteIndex();
         deleteObjects();
+        deleteHead();
         return deleteGit();
     }
 
@@ -244,6 +250,7 @@ public class IlleGITimate {
     public boolean deleteGit() {
         deleteIndex();
         deleteObjects();
+        deleteHead();
         return git.delete();
     }
 
@@ -261,6 +268,10 @@ public class IlleGITimate {
 
     public boolean deleteIndex() {
         return index.delete();
+    }
+
+    public boolean deleteHead() {
+        return HEAD.delete();
     }
 
     /*
@@ -282,6 +293,10 @@ public class IlleGITimate {
 
     public boolean indexExists() {
         return index.exists();
+    }
+
+    public boolean headExists() {
+        return HEAD.exists();
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**
