@@ -40,7 +40,7 @@ public class IlleGITimate {
      */
     private HashMap<String, String> storedFiles = new HashMap<String, String>();
 
-    // These are files
+    // Both of these are files
     private File index;
     private File HEAD;
 
