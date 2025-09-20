@@ -28,7 +28,7 @@ public class Objects {
     // METHODS
 
     private void initializePath(String pathname) {
-        objects = new File(pathname + "git/objects");
+        objects = new File(pathname);
     }
 
     public void initialize() {
