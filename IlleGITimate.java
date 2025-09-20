@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -97,7 +98,10 @@ public class IlleGITimate {
      * Note that 2, 3, 4 both involve rewriting the hashMap, which can be done in
      * one method since "put"ing also overwrites in a hashMap.
      */
+
+    // TODO: put a try-catch here?
     public void commitFile(File file) throws IOException {
+
         String hash = generateSha1Hex(file);
         String pathname = file.getPath();
 
@@ -109,6 +113,7 @@ public class IlleGITimate {
         // Cases 2, 3, 4:
         index.addFile(file);
         objects.addFile(file);
+
     }
 
     /*

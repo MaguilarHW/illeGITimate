@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -14,13 +15,24 @@ public class IlleGITimateTester {
     public static void main(String[] args) throws IOException {
         IlleGITimate test = new IlleGITimate();
 
+        /*
+         * Normal Behavior Tests
+         */
         testRepositoryCreation(test);
 
-        testCommittingNewFiles(test);
+        testCommittingNewTextFiles(test);
 
         testClearingRepository(test);
 
-        testCommittingDuplicateFiles(test);
+        testCommittingDuplicateTextFiles(test);
+
+        /*
+         * Edge Case Testing
+         */
+
+        testCommittingNonexistentFile(test);
+
+        // testCommittingWhenNoIndex(test);
 
         // test.deleteRepository();
     }
@@ -36,12 +48,13 @@ public class IlleGITimateTester {
 
     }
 
-    public static void testCommittingNewFiles(IlleGITimate test) throws IOException {
+    public static void testCommittingNewTextFiles(IlleGITimate test) throws IOException {
         File a = new File("testTextFiles/a.txt");
         File b = new File("testTextFiles/b.txt");
         File c = new File("testTextFiles/c.txt");
         File d = new File("testTextFiles/d.txt");
-        File[] files = { a, b, c, d };
+        File sampleText = new File("testTextFiles/sampleText.txt");
+        File[] files = { a, b, c, d, sampleText };
         String[] contents = new String[files.length];
         String[] hashes = new String[files.length];
 
@@ -132,19 +145,20 @@ public class IlleGITimateTester {
         }
     }
 
-    public static void testCommittingDuplicateFiles(IlleGITimate test) throws IOException {
+    public static void testCommittingDuplicateTextFiles(IlleGITimate test) throws IOException {
         File a = new File("testTextFiles/a.txt");
         File b = new File("testTextFiles/b.txt");
         File c = new File("testTextFiles/c.txt");
         File d = new File("testTextFiles/d.txt");
+        File sampleText = new File("testTextFiles/sampleText.txt");
 
         // Remember that these are duplicates (in contents) of the other files
         File a2 = new File("testTextFiles/a2.txt");
         File b2 = new File("testTextFiles/b2.txt");
         File c2 = new File("testTextFiles/c2.txt");
         File d2 = new File("testTextFiles/d2.txt");
-        File[] files = { a, b, c, d, a2, b2, c2, d2 };
-        File[] originals = { a, b, c, d };
+        File[] files = { a, b, c, d, sampleText, a2, b2, c2, d2 };
+        File[] originals = { a, b, c, d, sampleText };
         String[] contents = new String[files.length];
         String[] hashes = new String[files.length];
 
@@ -222,5 +236,16 @@ public class IlleGITimateTester {
 
         // Cleans the repository so that the next test can use it
         test.clearRepository();
+    }
+
+    public static void testCommittingNonexistentFile(IlleGITimate test) throws IOException {
+        File nonexistentFile = new File("thisisnotafile");
+
+        try {
+            test.commitFile(nonexistentFile);
+            System.out.println(RB + "Failed || (1) testCommittingNonexistentFile" + RESET_COLOR);
+        } catch (Exception e) {
+            System.out.println(GB + "Passed || (1) testCommittingNonexistentFile" + RESET_COLOR);
+        }
     }
 }
