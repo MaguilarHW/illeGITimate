@@ -146,6 +146,7 @@ public class Index {
         index.delete();
         index.createNewFile();
         storedFiles.clear();
+        numberOfEntries = 0;
     }
 
     public boolean containsPath(String pathname) {
