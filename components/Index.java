@@ -74,6 +74,8 @@ public class Index {
      * This is useful when running the program when an index already exists. This
      * also allows the HashMap to be filled with Files using the data within index.
      * 41 is the length of the hash.
+     * 
+     * TODO: technically this doesn't do anything if we try and remove things or clear
      */
     public void syncStoredFiles() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(index));
@@ -136,7 +138,7 @@ public class Index {
     public void clear() throws IOException {
         index.delete();
         index.createNewFile();
-        storedFiles.clear(); // TODO: Check if this is desired behavior
+        storedFiles.clear();
     }
 
     public boolean containsPath(String pathname) {
