@@ -22,24 +22,6 @@ public class IlleGITimate {
     private File git;
     private File objects;
 
-    /*
-     * This is an HashMap of all the files that are in the objects directory.
-     * Specifically, it contains the paths of all the added Files. I want this to
-     * have an easy way of looking up whether a file exists (with good efficiency)
-     * and it helps me not have to repeatedly iterate over the index when I can just
-     * initialize this and iterate through it for all my needs.
-     * 
-     * TLDR: storedFiles is a HashMap that represents index that will be tinkered
-     * with at run-time and the result will be written back to index
-     * 
-     * REMEMBER: <path, unique hash> since an index can only hold a path once,
-     * whereas an index can hold the same hash many times
-     * 
-     * could always refactor the hash to be an IndexEntry or some other custom
-     * object...
-     */
-    private HashMap<String, String> storedFiles = new HashMap<String, String>();
-
     // Both of these are files
     private File index;
     private File HEAD;
@@ -86,14 +68,6 @@ public class IlleGITimate {
     // METHODS
 
     /*
-     * Using apache library, which is gitignored. If this is not working for
-     * someone, download the jar files from Google
-     */
-    private String generateSha1Hex(File file) throws IOException {
-        return DigestUtils.sha1Hex(Files.readString(file.toPath()));
-    }
-
-    /*
      * The way I understand it, there are four scenarios when saving files using
      * git:
      * 
@@ -131,57 +105,6 @@ public class IlleGITimate {
         initializeIndexFromStoredFiles();
     }
 
-    // This makes the BLOB
-    private void saveFileToObjectsDirectory(File file) throws IOException {
-        String hash = generateSha1Hex(file);
-        File objectsFile = new File(objects.getPath() + "/" + hash);
-
-        // logic to copy stuff from file to objectsFile
-        // sleek!
-        FileOutputStream fos = new FileOutputStream(objectsFile);
-        Files.copy(file.toPath(), fos);
-        fos.close();
-    }
-
-    /*
-     * Rebuilds the index from the storedFiles memory copy. This is done after every
-     * commit
-     */
-    private void initializeIndexFromStoredFiles() throws IOException {
-        // Erases and rebirths the index file
-        index.delete();
-        index.createNewFile();
-
-        for (String pathname : storedFiles.keySet()) {
-            appendFileToIndex(new File(pathname));
-        }
-    }
-
-    private void appendFileToIndex(File file) throws IOException {
-        // Checking if index exists
-        if (!indexExists()) {
-            throw new FileNotFoundException("appendFileToIndex(File file): Index file does not exist");
-        }
-
-        String hash = generateSha1Hex(file);
-        String pathname = file.getPath();
-
-        // True means the FileWriter is appending the text
-        BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
-
-        // First line doesn't need a new line, subsequent edits do
-        if (!Files.readString(index.toPath()).isEmpty()) {
-            bw.newLine();
-        }
-
-        bw.write(hash + " " + pathname);
-        bw.close();
-    }
-
-    private void addFileToStoredFiles(File file) throws IOException {
-        storedFiles.put(file.getPath(), generateSha1Hex(file));
-    }
-
     /*
      * Builds the paths to each important file. If someone uses the default
      * constructor, pathname will be empty and these paths will simply point to
@@ -193,22 +116,6 @@ public class IlleGITimate {
         objects = new File(pathname + "git/objects");
         index = new File(pathname + "git/index");
         HEAD = new File(pathname + "git/HEAD");
-    }
-
-    /*
-     * This is useful when running the program when an index already exists. This
-     * allows the HashSet to be filled with Files using the data within index. 41 is
-     * the length of the hash.
-     */
-    private void initializeStoredFilesFromIndex() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(index));
-        while (br.ready()) {
-            String line = br.readLine();
-            String hash = line.substring(0, 40);
-            String pathname = line.substring(41, line.length());
-            storedFiles.put(pathname, hash);
-        }
-        br.close();
     }
 
     // Initializes git, objects, and index.
@@ -252,18 +159,6 @@ public class IlleGITimate {
         deleteObjects();
         deleteHead();
         return git.delete();
-    }
-
-    /*
-     * Objects is a directory containing many files. Java can only delete the
-     * directory if it is empty, thus this method deletes everything within objects
-     * first before finally deleting the directory objects.
-     */
-    public boolean deleteObjects() {
-        for (File file : objects.listFiles()) {
-            file.delete();
-        }
-        return objects.delete();
     }
 
     public boolean deleteIndex() {

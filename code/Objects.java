@@ -1,0 +1,73 @@
+package code;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
+public class Objects {
+
+    private File objects;
+    private String pathname;
+
+    public Objects(String pathname) throws IOException {
+        this.pathname = pathname;
+        initializePath(pathname);
+    }
+
+    // GETTERS
+
+    public boolean exists() {
+        return objects.exists();
+    }
+
+    public String getPath() {
+        return pathname;
+    }
+
+    // METHODS
+
+    private void initializePath(String pathname) {
+        objects = new File(pathname + "git/objects");
+    }
+
+    public void initialize() {
+        objects.mkdir();
+    }
+
+    /*
+     * Using apache library, which is gitignored. If this is not working for
+     * someone, download the jar files from Google
+     */
+    private String generateSha1Hex(File file) throws IOException {
+        return DigestUtils.sha1Hex(Files.readString(file.toPath()));
+    }
+
+    /*
+     * This generates the BLOB and puts it in git/objects/
+     */
+    public void addFile(File file) throws IOException {
+        String hash = generateSha1Hex(file);
+        File objectsFile = new File(objects.getPath() + "/" + hash);
+
+        // logic to copy stuff from file to objectsFile
+        // sleek!
+        FileOutputStream fos = new FileOutputStream(objectsFile);
+        Files.copy(file.toPath(), fos);
+        fos.close();
+    }
+
+    /*
+     * Objects is a directory containing many files. Java can only delete the
+     * directory if it is empty, thus this method deletes everything within objects
+     * first before finally deleting the directory objects.
+     */
+    public boolean delete() {
+        for (File file : objects.listFiles()) {
+            file.delete();
+        }
+        return objects.delete();
+    }
+}
