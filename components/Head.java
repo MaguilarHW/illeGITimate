@@ -17,10 +17,6 @@ public class Head {
         return HEAD.exists();
     }
 
-    public String getPath() {
-        return HEAD.getPath();
-    }
-
     // METHODS
 
     private void initializePath(String pathname){

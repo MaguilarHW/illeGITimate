@@ -47,10 +47,6 @@ public class Index {
         return index.exists();
     }
 
-    public String getPath() {
-        return index.getPath();
-    }
-
     // METHODS
 
     private void initializePath(String pathname) {

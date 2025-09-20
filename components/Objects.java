@@ -21,9 +21,6 @@ public class Objects {
         return objects.exists();
     }
 
-    public String getPath() {
-        return objects.getPath();
-    }
 
     // METHODS
 
@@ -71,5 +68,13 @@ public class Objects {
         for (File file : objects.listFiles()) {
             file.delete();
         }
+    }
+
+    public File[] listFiles() {
+        return objects.listFiles();
+    }
+
+    public String[] list() {
+        return objects.list();
     }
 }

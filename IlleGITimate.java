@@ -53,7 +53,7 @@ public class IlleGITimate {
      */
     public IlleGITimate(String pathname) throws IOException {
         this.pathname = pathname + "/";
-        
+
         constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
@@ -64,7 +64,7 @@ public class IlleGITimate {
         }
 
         index.syncStoredFiles();
-        
+
     }
 
     // METHODS
@@ -170,6 +170,20 @@ public class IlleGITimate {
      */
     public boolean isRepositoryHealthy() {
         return git.exists() && objects.exists() && index.exists() && HEAD.exists();
+    }
+
+    /*
+     * This is for testing purposes and should NOT be used otherwise.
+     */
+    public Objects getObjects() {
+        return objects;
+    }
+
+    /*
+     * This is for testing purposes and should NOT be used otherwise.
+     */
+    public Index getIndex() {
+        return index;
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**
