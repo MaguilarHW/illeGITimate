@@ -1,15 +1,13 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.HashMap;
 import java.io.IOException;
 import java.nio.file.Files;
 
 import org.apache.commons.codec.digest.DigestUtils;
+
+import components.Git;
+import components.Head;
+import components.Index;
+import components.Objects;
 
 public class IlleGITimate {
 
@@ -19,12 +17,12 @@ public class IlleGITimate {
     private String pathname = "";
 
     // Remember, these are directories
-    private File git;
-    private File objects;
+    private Git git;
+    private Objects objects;
 
     // Both of these are files
-    private File index;
-    private File HEAD;
+    private Index index;
+    private Head HEAD;
 
     // CONSTRUCTORS
 
@@ -32,7 +30,8 @@ public class IlleGITimate {
      * If the repository already exists, this will not overwrite anything
      */
     public IlleGITimate() throws IOException {
-        initializePaths();
+
+        constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
@@ -41,7 +40,8 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        initializeStoredFilesFromIndex();
+        index.syncStoredFiles();
+
     }
 
     /*
@@ -53,7 +53,8 @@ public class IlleGITimate {
      */
     public IlleGITimate(String pathname) throws IOException {
         this.pathname = pathname + "/";
-        initializePaths();
+        
+        constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
@@ -62,10 +63,19 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        initializeStoredFilesFromIndex();
+        index.syncStoredFiles();
+        
     }
 
     // METHODS
+
+    /*
+     * Using apache library, which is gitignored. If this is not working for
+     * someone, download the jar files from Google
+     */
+    private String generateSha1Hex(File file) throws IOException {
+        return DigestUtils.sha1Hex(Files.readString(file.toPath()));
+    }
 
     /*
      * The way I understand it, there are four scenarios when saving files using
@@ -92,17 +102,13 @@ public class IlleGITimate {
         String pathname = file.getPath();
 
         // Case 1:
-        if (storedFiles.containsKey(pathname) && storedFiles.get(pathname).equals(hash)) {
+        if (index.containsPath(pathname) && index.containsHash(pathname, hash)) {
             return;
         }
 
         // Cases 2, 3, 4:
-        addFileToStoredFiles(file);
-        saveFileToObjectsDirectory(file);
-
-        // instead of trying to deal with in-place edits, just rewrite the entire index
-        // every time we commit a file. could probably do this better tbh
-        initializeIndexFromStoredFiles();
+        index.addFile(file);
+        objects.addFile(file);
     }
 
     /*
@@ -111,27 +117,38 @@ public class IlleGITimate {
      * usual location of where git should be (one layer within the overarching
      * repository folder)
      */
-    private void initializePaths() {
-        git = new File(pathname + "git");
-        objects = new File(pathname + "git/objects");
-        index = new File(pathname + "git/index");
-        HEAD = new File(pathname + "git/HEAD");
+    private void constructRepositoryPaths() throws IOException {
+        git = new Git(pathname + "git");
+        objects = new Objects(pathname + "git/objects");
+        index = new Index(pathname + "git/index");
+        HEAD = new Head(pathname + "git/HEAD");
     }
 
-    // Initializes git, objects, and index.
+    /*
+     * Builds the paths to each important file. If someone uses the default
+     * constructor, pathname will be empty and these paths will simply point to
+     * usual location of where git should be (one layer within the overarching
+     * repository folder)
+     */
     private void initializeRepository() throws IOException {
-        if (!gitExists()) {
-            git.mkdir();
+        if (!git.exists()) {
+            git.initialize();
         }
-        if (!objectsExists()) {
-            objects.mkdir();
+        if (!objects.exists()) {
+            objects.initialize();
         }
-        if (!indexExists()) {
-            index.createNewFile();
+        if (!index.exists()) {
+            index.initialize();
         }
-        if (!headExists()) {
-            HEAD.createNewFile();
+        if (!HEAD.exists()) {
+            HEAD.initialize();
         }
+    }
+
+    // Stretch Goal #2: Include a way to reset test files (3%)
+    public void clearRepository() throws IOException {
+        index.clear();
+        objects.deleteContents();
     }
 
     /*
@@ -140,33 +157,10 @@ public class IlleGITimate {
      * directories can only be deleted by Java if they are empty.
      */
     public boolean deleteRepository() {
-        deleteIndex();
-        deleteObjects();
-        deleteHead();
-        return deleteGit();
-    }
-
-    /*
-     * Git is a directory containing objects. Objects must therefore be deleted
-     * first. One might want to change this implementation later to handle the edge
-     * case where git does not exist but objects and index do, whereby objects would
-     * need to be moved within git...
-     * 
-     * Honestly, this is the same thing as deleteRepository. At least for now...
-     */
-    public boolean deleteGit() {
-        deleteIndex();
-        deleteObjects();
-        deleteHead();
+        index.delete();
+        objects.delete();
+        HEAD.delete();
         return git.delete();
-    }
-
-    public boolean deleteIndex() {
-        return index.delete();
-    }
-
-    public boolean deleteHead() {
-        return HEAD.delete();
     }
 
     /*
@@ -175,23 +169,7 @@ public class IlleGITimate {
      * unhealthy.
      */
     public boolean isRepositoryHealthy() {
-        return gitExists() && objectsExists() && indexExists();
-    }
-
-    public boolean gitExists() {
-        return git.exists();
-    }
-
-    public boolean objectsExists() {
-        return objects.exists();
-    }
-
-    public boolean indexExists() {
-        return index.exists();
-    }
-
-    public boolean headExists() {
-        return HEAD.exists();
+        return git.exists() && objects.exists() && index.exists() && HEAD.exists();
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**
@@ -213,12 +191,4 @@ public class IlleGITimate {
     // }
     // }
     // }
-
-    // Stretch Goal #2: Include a way to reset test files (3%)
-    public void clearRepositoryForTestingPurposes() throws IOException {
-        index.delete();
-        index.createNewFile();
-        deleteObjects();
-        objects.mkdir();
-    }
 }

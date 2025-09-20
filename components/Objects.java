@@ -1,4 +1,4 @@
-package code;
+package components;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,10 +10,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 public class Objects {
 
     private File objects;
-    private String pathname;
 
     public Objects(String pathname) throws IOException {
-        this.pathname = pathname;
         initializePath(pathname);
     }
 
@@ -24,7 +22,7 @@ public class Objects {
     }
 
     public String getPath() {
-        return pathname;
+        return objects.getPath();
     }
 
     // METHODS
@@ -65,9 +63,13 @@ public class Objects {
      * first before finally deleting the directory objects.
      */
     public boolean delete() {
+        deleteContents();
+        return objects.delete();
+    }
+
+    public void deleteContents(){
         for (File file : objects.listFiles()) {
             file.delete();
         }
-        return objects.delete();
     }
 }

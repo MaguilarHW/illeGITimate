@@ -1,4 +1,4 @@
-package code;
+package components;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +35,6 @@ public class Index {
 
     public Index(String pathname) throws IOException {
         initializePath(pathname);
-        syncStoredFiles();
     }
 
     // GETTERS
@@ -58,7 +57,7 @@ public class Index {
         index = new File(pathname + "git/index");
     }
 
-    private void initialize() throws IOException {
+    public void initialize() throws IOException {
         index.createNewFile();
     }
 
@@ -76,7 +75,7 @@ public class Index {
      * also allows the HashMap to be filled with Files using the data within index.
      * 41 is the length of the hash.
      */
-    private void syncStoredFiles() throws IOException {
+    public void syncStoredFiles() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
@@ -90,15 +89,17 @@ public class Index {
     /*
      * The same as above, but for adding a single file to storedFiles
      */
-    private void addToStoredFiles(File file) throws IOException {
+    public void addFile(File file) throws IOException {
         storedFiles.put(file.getPath(), generateSha1Hex(file));
+        refresh();
     }
 
     /*
-     * Rebuilds the index from the storedFiles memory copy. This needs to be done every time a commit is made.
+     * Rebuilds the index by deleting the index file and then rewriting it from
+     * what's stored in storedFiles. This needs to be done every time a commit is
+     * made. I understand that there is probably a better way to do this.
      */
     private void refresh() throws IOException {
-        // Erases and rebirths the index file
         index.delete();
         index.createNewFile();
 
@@ -107,7 +108,7 @@ public class Index {
         }
     }
 
-    public void appendFile(File file) throws IOException {
+    private void appendFile(File file) throws IOException {
         // Checking if index exists
         if (!this.exists()) {
             throw new FileNotFoundException("appendFileToIndex(File file): Index file does not exist");
@@ -126,5 +127,23 @@ public class Index {
 
         bw.write(hash + " " + pathname);
         bw.close();
+    }
+
+    public boolean delete() {
+        return index.delete();
+    }
+
+    public void clear() throws IOException {
+        index.delete();
+        index.createNewFile();
+        syncStoredFiles(); // TODO: Check if this is desired behavior
+    }
+
+    public boolean containsPath(String pathname) {
+        return storedFiles.containsKey(pathname);
+    }
+
+    public boolean containsHash(String pathname, String hash) {
+        return storedFiles.get(pathname).equals(hash);
     }
 }
