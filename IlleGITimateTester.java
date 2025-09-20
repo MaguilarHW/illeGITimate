@@ -78,7 +78,35 @@ public class IlleGITimateTester {
             }
         }
 
-        // (4) Checks to see if the index has been updated properly
+        // (4) Checks to see if the index has the right number of entries
+        if (test.getIndex().getNumberOfEntries() == files.length) {
+            System.out.println("Passed || (4) testCommittingNewFiles");
+        }
+        else {
+            System.out.println("Failed || (4) testCommittingNewFiles");
+        }
+
+        // (5) Checks to see if the index has all the path names in it
+        for (int i = 0; i < files.length; i++) {
+            if (!test.getIndex().containsPath(files[i].getPath())) {
+                System.out.println("Failed || (5) testCommittingNewFiles");
+                break;
+            }
+            if (i == files.length - 1) {
+                System.out.println("Passed || (5) testCommittingNewFiles");
+            }
+        }
+
+        // (6) Checks to see if the index has all the hashes in it
+        for (int i = 0; i < files.length; i++) {
+            if (!test.getIndex().containsHash(files[i].getPath(), hashes[i])) {
+                System.out.println("Failed || (6) testCommittingNewFiles");
+                break;
+            }
+            if (i == files.length - 1) {
+                System.out.println("Passed || (6) testCommittingNewFiles");
+            }
+        }
     }
 
     public static void testClearingRepository(IlleGITimate test) throws IOException {

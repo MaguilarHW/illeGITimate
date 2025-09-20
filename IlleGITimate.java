@@ -40,7 +40,7 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        index.syncStoredFiles();
+        index.sync();
 
     }
 
@@ -63,7 +63,7 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        index.syncStoredFiles();
+        index.sync();
 
     }
 
