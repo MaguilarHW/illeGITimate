@@ -136,7 +136,7 @@ public class Index {
     public void clear() throws IOException {
         index.delete();
         index.createNewFile();
-        syncStoredFiles(); // TODO: Check if this is desired behavior
+        storedFiles.clear(); // TODO: Check if this is desired behavior
     }
 
     public boolean containsPath(String pathname) {
