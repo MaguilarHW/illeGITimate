@@ -54,7 +54,7 @@ public class Index {
     // METHODS
 
     private void initializePath(String pathname) {
-        index = new File(pathname + "git/index");
+        index = new File(pathname);
     }
 
     public void initialize() throws IOException {

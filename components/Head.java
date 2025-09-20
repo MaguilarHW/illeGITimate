@@ -24,7 +24,7 @@ public class Head {
     // METHODS
 
     private void initializePath(String pathname){
-        HEAD = new File(pathname + "git/HEAD");
+        HEAD = new File(pathname);
     }
 
     public void initialize() throws IOException {
