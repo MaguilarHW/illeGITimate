@@ -1,15 +1,13 @@
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.HashMap;
 import java.io.IOException;
 import java.nio.file.Files;
 
 import org.apache.commons.codec.digest.DigestUtils;
+
+import components.Git;
+import components.Head;
+import components.Index;
+import components.Objects;
 
 public class IlleGITimate {
 
@@ -19,30 +17,12 @@ public class IlleGITimate {
     private String pathname = "";
 
     // Remember, these are directories
-    private File git;
-    private File objects;
-
-    /*
-     * This is an HashMap of all the files that are in the objects directory.
-     * Specifically, it contains the paths of all the added Files. I want this to
-     * have an easy way of looking up whether a file exists (with good efficiency)
-     * and it helps me not have to repeatedly iterate over the index when I can just
-     * initialize this and iterate through it for all my needs.
-     * 
-     * TLDR: storedFiles is a HashMap that represents index that will be tinkered
-     * with at run-time and the result will be written back to index
-     * 
-     * REMEMBER: <path, unique hash> since an index can only hold a path once,
-     * whereas an index can hold the same hash many times
-     * 
-     * could always refactor the hash to be an IndexEntry or some other custom
-     * object...
-     */
-    private HashMap<String, String> storedFiles = new HashMap<String, String>();
+    private Git git;
+    private Objects objects;
 
     // Both of these are files
-    private File index;
-    private File HEAD;
+    private Index index;
+    private Head HEAD;
 
     // CONSTRUCTORS
 
@@ -50,7 +30,8 @@ public class IlleGITimate {
      * If the repository already exists, this will not overwrite anything
      */
     public IlleGITimate() throws IOException {
-        initializePaths();
+
+        constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
@@ -59,7 +40,8 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        initializeStoredFilesFromIndex();
+        index.syncStoredFiles();
+
     }
 
     /*
@@ -71,7 +53,8 @@ public class IlleGITimate {
      */
     public IlleGITimate(String pathname) throws IOException {
         this.pathname = pathname + "/";
-        initializePaths();
+        
+        constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
             System.out.println("Git Repository Already Exists");
@@ -80,7 +63,8 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        initializeStoredFilesFromIndex();
+        index.syncStoredFiles();
+        
     }
 
     // METHODS
@@ -118,68 +102,13 @@ public class IlleGITimate {
         String pathname = file.getPath();
 
         // Case 1:
-        if (storedFiles.containsKey(pathname) && storedFiles.get(pathname).equals(hash)) {
+        if (index.containsPath(pathname) && index.containsHash(pathname, hash)) {
             return;
         }
 
         // Cases 2, 3, 4:
-        addFileToStoredFiles(file);
-        saveFileToObjectsDirectory(file);
-
-        // instead of trying to deal with in-place edits, just rewrite the entire index
-        // every time we commit a file. could probably do this better tbh
-        initializeIndexFromStoredFiles();
-    }
-
-    // This makes the BLOB
-    private void saveFileToObjectsDirectory(File file) throws IOException {
-        String hash = generateSha1Hex(file);
-        File objectsFile = new File(objects.getPath() + "/" + hash);
-
-        // logic to copy stuff from file to objectsFile
-        // sleek!
-        FileOutputStream fos = new FileOutputStream(objectsFile);
-        Files.copy(file.toPath(), fos);
-        fos.close();
-    }
-
-    /*
-     * Rebuilds the index from the storedFiles memory copy. This is done after every
-     * commit
-     */
-    private void initializeIndexFromStoredFiles() throws IOException {
-        // Erases and rebirths the index file
-        index.delete();
-        index.createNewFile();
-
-        for (String pathname : storedFiles.keySet()) {
-            appendFileToIndex(new File(pathname));
-        }
-    }
-
-    private void appendFileToIndex(File file) throws IOException {
-        // Checking if index exists
-        if (!indexExists()) {
-            throw new FileNotFoundException("appendFileToIndex(File file): Index file does not exist");
-        }
-
-        String hash = generateSha1Hex(file);
-        String pathname = file.getPath();
-
-        // True means the FileWriter is appending the text
-        BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
-
-        // First line doesn't need a new line, subsequent edits do
-        if (!Files.readString(index.toPath()).isEmpty()) {
-            bw.newLine();
-        }
-
-        bw.write(hash + " " + pathname);
-        bw.close();
-    }
-
-    private void addFileToStoredFiles(File file) throws IOException {
-        storedFiles.put(file.getPath(), generateSha1Hex(file));
+        index.addFile(file);
+        objects.addFile(file);
     }
 
     /*
@@ -188,43 +117,38 @@ public class IlleGITimate {
      * usual location of where git should be (one layer within the overarching
      * repository folder)
      */
-    private void initializePaths() {
-        git = new File(pathname + "git");
-        objects = new File(pathname + "git/objects");
-        index = new File(pathname + "git/index");
-        HEAD = new File(pathname + "git/HEAD");
+    private void constructRepositoryPaths() throws IOException {
+        git = new Git(pathname + "git");
+        objects = new Objects(pathname + "git/objects");
+        index = new Index(pathname + "git/index");
+        HEAD = new Head(pathname + "git/HEAD");
     }
 
     /*
-     * This is useful when running the program when an index already exists. This
-     * allows the HashSet to be filled with Files using the data within index. 41 is
-     * the length of the hash.
+     * Builds the paths to each important file. If someone uses the default
+     * constructor, pathname will be empty and these paths will simply point to
+     * usual location of where git should be (one layer within the overarching
+     * repository folder)
      */
-    private void initializeStoredFilesFromIndex() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(index));
-        while (br.ready()) {
-            String line = br.readLine();
-            String hash = line.substring(0, 40);
-            String pathname = line.substring(41, line.length());
-            storedFiles.put(pathname, hash);
+    private void initializeRepository() throws IOException {
+        if (!git.exists()) {
+            git.initialize();
         }
-        br.close();
+        if (!objects.exists()) {
+            objects.initialize();
+        }
+        if (!index.exists()) {
+            index.initialize();
+        }
+        if (!HEAD.exists()) {
+            HEAD.initialize();
+        }
     }
 
-    // Initializes git, objects, and index.
-    private void initializeRepository() throws IOException {
-        if (!gitExists()) {
-            git.mkdir();
-        }
-        if (!objectsExists()) {
-            objects.mkdir();
-        }
-        if (!indexExists()) {
-            index.createNewFile();
-        }
-        if (!headExists()) {
-            HEAD.createNewFile();
-        }
+    // Stretch Goal #2: Include a way to reset test files (3%)
+    public void clearRepository() throws IOException {
+        index.clear();
+        objects.deleteContents();
     }
 
     /*
@@ -233,45 +157,10 @@ public class IlleGITimate {
      * directories can only be deleted by Java if they are empty.
      */
     public boolean deleteRepository() {
-        deleteIndex();
-        deleteObjects();
-        deleteHead();
-        return deleteGit();
-    }
-
-    /*
-     * Git is a directory containing objects. Objects must therefore be deleted
-     * first. One might want to change this implementation later to handle the edge
-     * case where git does not exist but objects and index do, whereby objects would
-     * need to be moved within git...
-     * 
-     * Honestly, this is the same thing as deleteRepository. At least for now...
-     */
-    public boolean deleteGit() {
-        deleteIndex();
-        deleteObjects();
-        deleteHead();
+        index.delete();
+        objects.delete();
+        HEAD.delete();
         return git.delete();
-    }
-
-    /*
-     * Objects is a directory containing many files. Java can only delete the
-     * directory if it is empty, thus this method deletes everything within objects
-     * first before finally deleting the directory objects.
-     */
-    public boolean deleteObjects() {
-        for (File file : objects.listFiles()) {
-            file.delete();
-        }
-        return objects.delete();
-    }
-
-    public boolean deleteIndex() {
-        return index.delete();
-    }
-
-    public boolean deleteHead() {
-        return HEAD.delete();
     }
 
     /*
@@ -280,23 +169,7 @@ public class IlleGITimate {
      * unhealthy.
      */
     public boolean isRepositoryHealthy() {
-        return gitExists() && objectsExists() && indexExists();
-    }
-
-    public boolean gitExists() {
-        return git.exists();
-    }
-
-    public boolean objectsExists() {
-        return objects.exists();
-    }
-
-    public boolean indexExists() {
-        return index.exists();
-    }
-
-    public boolean headExists() {
-        return HEAD.exists();
+        return git.exists() && objects.exists() && index.exists() && HEAD.exists();
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**
@@ -318,12 +191,4 @@ public class IlleGITimate {
     // }
     // }
     // }
-
-    // Stretch Goal #2: Include a way to reset test files (3%)
-    public void clearRepositoryForTestingPurposes() throws IOException {
-        index.delete();
-        index.createNewFile();
-        deleteObjects();
-        objects.mkdir();
-    }
 }
