@@ -26,6 +26,8 @@ public class IlleGITimateTester {
 
         testCommittingDuplicateTextFiles(test);
 
+        testRepeatedlyCreatingAndClearingRepository(test);
+
         /*
          * Edge Case Testing
          */
@@ -245,5 +247,31 @@ public class IlleGITimateTester {
         } catch (Exception e) {
             System.out.println(GB + "Passed || (1) testCommittingNonexistentFile" + RESET_COLOR);
         }
+    }
+
+    public static void testRepeatedlyCreatingAndClearingRepository(IlleGITimate test) {
+        try {
+            File a = new File("testTextFiles/a.txt");
+            File b = new File("testTextFiles/b.txt");
+            File c = new File("testTextFiles/c.txt");
+            File d = new File("testTextFiles/d.txt");
+            File sampleText = new File("testTextFiles/sampleText.txt");
+            File[] files = { a, b, c, d, sampleText };
+
+            // creates and removes files 100 times lol
+            for (int i = 0; i < 100; i++) {
+                test.clearRepository();
+
+                for (File file : files) {
+                    test.commitFile(file);
+                }
+            }
+
+            test.clearRepository();
+        } catch (Exception e) {
+            System.out.println(RB + "Failed || (1) testRepeatedlyCreatingAndClearingRepository" + RESET_COLOR);
+        }
+
+        System.out.println(GB + "Passed || (1) testRepeatedlyCreatingAndClearingRepository" + RESET_COLOR);
     }
 }

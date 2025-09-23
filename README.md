@@ -16,7 +16,7 @@
 
   <h1 align="center">illeGITimate</h1>
 
-</div>
+</div> 
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -149,8 +149,6 @@ In this project, there are a number of stretch goals. Since I don't think we've 
 IlleGITimateTester.java
 ```
 
-Features a test that runs multiple initialization/cleanup cycles to ensure robust functionality (havent done this part yet)
-
 ### Stretch Goal (GP-2.3.1) - Confirm BLOBs exist and reset them
 ```java
 public static void testCommittingNewTextFiles(IlleGITimate test) {}
@@ -175,6 +173,7 @@ public static void testCommittingDuplicateTextFiles(IlleGITimate test) {}
 ### Stretch Goal (GP-2.4.2) - Delete/clear methods
 ```java
 public boolean deleteRepository() {}
+
 public boolean clearRepository() {}
 ```
 
