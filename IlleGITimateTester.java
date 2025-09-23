@@ -13,6 +13,7 @@ public class IlleGITimateTester {
     public static final String RESET_COLOR = "\u001B[0m"; // RESET
 
     public static void main(String[] args) throws IOException {
+        // git/objects/ needs to be clear before doing any tests
         IlleGITimate test = new IlleGITimate();
 
         /*
@@ -32,9 +33,7 @@ public class IlleGITimateTester {
 
         testCommittingNonexistentFile(test);
 
-        // testCommittingWhenNoIndex(test);
-
-        // test.deleteRepository();
+        test.deleteRepository();
     }
 
     public static void testRepositoryCreation(IlleGITimate test) {
