@@ -19,10 +19,17 @@ public class Head {
 
     // METHODS
 
+    /*
+     * Since the private File HEAD is initialized without a pathname, this
+     * method assigns a pathname to HEAD so that it can point somewhere
+     */
     private void initializePath(String pathname){
         HEAD = new File(pathname);
     }
 
+     /*
+     * Once the pathname is assigned, this makes the HEAD file
+     */
     public void initialize() throws IOException {
         HEAD.createNewFile();
     }

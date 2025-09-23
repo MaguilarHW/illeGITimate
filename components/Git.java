@@ -18,10 +18,17 @@ public class Git {
 
     // METHODS
 
+    /*
+     * Since the private File git is initialized without a pathname, this
+     * method assigns a pathname to git so that it can point somewhere
+     */
     private void initializePath(String pathname) {
         git = new File(pathname);
     }
 
+    /*
+     * Once the pathname is assigned, this makes the directory
+     */
     public void initialize() {
         git.mkdir();
     }

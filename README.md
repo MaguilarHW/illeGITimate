@@ -23,10 +23,10 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#general-structure-and-organization">General Structure and Organization
+      <a href="#what-is-going-on-what-does-everything-mean">What is going on? What does everything mean?
       </a>
       <ul>
-        <li><a href="#git.java">Git.java</a></li>
+        <li><a href="#gitjava">Git.java</a></li>
         <li><a href="#index.java">Index.java</a></li>
         <li><a href="#head.java">Head.java</a></li>
         <li><a href="#objects.java">Objects.java</a></li>
@@ -41,43 +41,45 @@
       </ul>
     </li>
     <li><a href="#tester">Tester</a></li>
+    <li><a href="#tips">Tips</a></li>
+    <li><a href="#how-do-i-run-the-code">How do I run the code?</a></li>
   </ol>
 </details>
 
 <!-- ABOUT THE PROJECT -->
 
-## General Structure and Organization
+## What is going on? What does everything mean?
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+Hey, it's Miles. Please read this entire thing (on Github, not VSCode, so you get the nice formatting) so that you have a good idea about how IlleGITimate works. I probably haven't done things in the best way so the purpose of this README is to give you a good idea of how I thought about coding this project thus far. Hopefully this means you will have an easier time making changes! 
 
-Here's why:
+The codebase of this project is broken up into individual `.java` files which each represent a core component of our Git recreation. **Each class, at it's core, is a file path wrapped with extra functionality.** Wrapping means each class contains a private `File` variable which it encloses:
 
-- Your time should be focused on creating something amazing. A project that solves a problem and helps others
-- You shouldn't be doing the same tasks over and over like creating a README from scratch
-- You should implement DRY principles to the rest of your life :smile:
+- `Git.java` represents the folder `git`
+- `Objects.java` represents the folder `git/objects`
+- `Index.java` represents the file `git/index`
+- `Head.java` represents the file `git/HEAD`
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+This means if you want to change something about the way the `git/objects` folder works, you should probably go to `Objects.java`. 
 
-Use the `BLANK_README.md` to get started.
+The purpose of `IlleGITimate.java` is to coordinate all these classes and define methods like 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+```java
+public void commitFile(File file) throws IOException {
+    // example code
+    index.doSomething(file);
+    objects.doSomething(file);
+} 
+```
 
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-- [![Next][Next.js]][Next-url]
-- [![React][React.js]][React-url]
-- [![Vue][Vue.js]][Vue-url]
-- [![Angular][Angular.io]][Angular-url]
-- [![Svelte][Svelte.dev]][Svelte-url]
-- [![Laravel][Laravel.com]][Laravel-url]
-- [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-- [![JQuery][JQuery.com]][JQuery-url]
+which use methods from multiple classes to get things done. For each class, I'll point out some important methods that I've made and also the general methodology I had when writing it. 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
+## ```Git.java```
+
+There's nothing really going on here, so this is a good time for me to go over what the basic methods you'll see in *every* class are. 
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting Started
 

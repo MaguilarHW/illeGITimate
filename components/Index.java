@@ -54,10 +54,17 @@ public class Index {
 
     // METHODS
 
+    /*
+     * Since the private File index is initialized without a pathname, this
+     * method assigns a pathname to index so that it can point somewhere
+     */
     private void initializePath(String pathname) {
         index = new File(pathname);
     }
 
+    /*
+     * Once the pathname is assigned, this makes the index file
+     */
     public void initialize() throws IOException {
         index.createNewFile();
     }
