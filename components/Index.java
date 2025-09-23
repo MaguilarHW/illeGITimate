@@ -92,7 +92,7 @@ public class Index {
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
-            String hash = line.substring(0, 40);
+            String hash = line.substring(0, 40); // apoloigies for the magic number
             String pathname = line.substring(41, line.length());
             storedFiles.put(pathname, hash);
             numberOfEntries += 1;
@@ -124,6 +124,10 @@ public class Index {
         }
     }
 
+    /*
+     * writes a new line to the index. this only ever happens after storedFiles has
+     * been modified
+     */
     private void appendFile(File file) throws IOException {
         // Checking if index exists
         if (!this.exists()) {
