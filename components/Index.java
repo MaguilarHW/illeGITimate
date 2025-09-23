@@ -32,6 +32,7 @@ public class Index {
      */
     private HashMap<String, String> storedFiles = new HashMap<String, String>();
     private File index;
+    private int numberOfEntries;
 
     public Index(String pathname) throws IOException {
         initializePath(pathname);
@@ -47,8 +48,8 @@ public class Index {
         return index.exists();
     }
 
-    public String getPath() {
-        return index.getPath();
+    public int getNumberOfEntries() {
+        return numberOfEntries;
     }
 
     // METHODS
@@ -74,14 +75,20 @@ public class Index {
      * This is useful when running the program when an index already exists. This
      * also allows the HashMap to be filled with Files using the data within index.
      * 41 is the length of the hash.
+     * 
+     * TODO: technically this doesn't do anything if we try and remove things or
+     * clear
      */
-    public void syncStoredFiles() throws IOException {
+    public void sync() throws IOException {
+        numberOfEntries = 0;
+
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
             String hash = line.substring(0, 40);
             String pathname = line.substring(41, line.length());
             storedFiles.put(pathname, hash);
+            numberOfEntries += 1;
         }
         br.close();
     }
@@ -91,7 +98,7 @@ public class Index {
      */
     public void addFile(File file) throws IOException {
         storedFiles.put(file.getPath(), generateSha1Hex(file));
-        refresh();
+        rewrite();
     }
 
     /*
@@ -99,11 +106,13 @@ public class Index {
      * what's stored in storedFiles. This needs to be done every time a commit is
      * made. I understand that there is probably a better way to do this.
      */
-    private void refresh() throws IOException {
+    private void rewrite() throws IOException {
         index.delete();
         index.createNewFile();
+        numberOfEntries = 0;
 
         for (String pathname : storedFiles.keySet()) {
+            numberOfEntries += 1;
             appendFile(new File(pathname));
         }
     }
@@ -136,7 +145,8 @@ public class Index {
     public void clear() throws IOException {
         index.delete();
         index.createNewFile();
-        storedFiles.clear(); // TODO: Check if this is desired behavior
+        storedFiles.clear();
+        numberOfEntries = 0;
     }
 
     public boolean containsPath(String pathname) {

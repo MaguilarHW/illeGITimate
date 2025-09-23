@@ -16,10 +16,6 @@ public class Git {
         return git.exists();
     }
 
-    public String getPath() {
-        return git.getPath();
-    }
-
     // METHODS
 
     private void initializePath(String pathname) {

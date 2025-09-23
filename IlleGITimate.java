@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -40,7 +41,7 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        index.syncStoredFiles();
+        index.sync();
 
     }
 
@@ -53,7 +54,7 @@ public class IlleGITimate {
      */
     public IlleGITimate(String pathname) throws IOException {
         this.pathname = pathname + "/";
-        
+
         constructRepositoryPaths();
 
         if (isRepositoryHealthy()) {
@@ -63,8 +64,8 @@ public class IlleGITimate {
             System.out.println("Git Repository Created");
         }
 
-        index.syncStoredFiles();
-        
+        index.sync();
+
     }
 
     // METHODS
@@ -97,7 +98,10 @@ public class IlleGITimate {
      * Note that 2, 3, 4 both involve rewriting the hashMap, which can be done in
      * one method since "put"ing also overwrites in a hashMap.
      */
+
+    // TODO: put a try-catch here?
     public void commitFile(File file) throws IOException {
+
         String hash = generateSha1Hex(file);
         String pathname = file.getPath();
 
@@ -109,6 +113,7 @@ public class IlleGITimate {
         // Cases 2, 3, 4:
         index.addFile(file);
         objects.addFile(file);
+
     }
 
     /*
@@ -170,6 +175,20 @@ public class IlleGITimate {
      */
     public boolean isRepositoryHealthy() {
         return git.exists() && objects.exists() && index.exists() && HEAD.exists();
+    }
+
+    /*
+     * This is for testing purposes and should NOT be used otherwise.
+     */
+    public Objects getObjects() {
+        return objects;
+    }
+
+    /*
+     * This is for testing purposes and should NOT be used otherwise.
+     */
+    public Index getIndex() {
+        return index;
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**
