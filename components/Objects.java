@@ -24,10 +24,17 @@ public class Objects {
 
     // METHODS
 
+    /*
+     * Since the private File objects is initialized without a pathname, this
+     * method assigns a pathname to objects so that it can point somewhere
+     */
     private void initializePath(String pathname) {
         objects = new File(pathname);
     }
 
+    /*
+     * Once the pathname is assigned, this makes the objects directory
+     */
     public void initialize() {
         objects.mkdir();
     }

@@ -54,10 +54,17 @@ public class Index {
 
     // METHODS
 
+    /*
+     * Since the private File index is initialized without a pathname, this
+     * method assigns a pathname to index so that it can point somewhere
+     */
     private void initializePath(String pathname) {
         index = new File(pathname);
     }
 
+    /*
+     * Once the pathname is assigned, this makes the index file
+     */
     public void initialize() throws IOException {
         index.createNewFile();
     }
@@ -85,7 +92,7 @@ public class Index {
         BufferedReader br = new BufferedReader(new FileReader(index));
         while (br.ready()) {
             String line = br.readLine();
-            String hash = line.substring(0, 40);
+            String hash = line.substring(0, 40); // apoloigies for the magic number
             String pathname = line.substring(41, line.length());
             storedFiles.put(pathname, hash);
             numberOfEntries += 1;
@@ -117,6 +124,10 @@ public class Index {
         }
     }
 
+    /*
+     * writes a new line to the index. this only ever happens after storedFiles has
+     * been modified
+     */
     private void appendFile(File file) throws IOException {
         // Checking if index exists
         if (!this.exists()) {

@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -33,7 +32,7 @@ public class IlleGITimateTester {
 
         testCommittingNonexistentFile(test);
 
-        test.deleteRepository();
+        // test.deleteRepository();
     }
 
     public static void testRepositoryCreation(IlleGITimate test) {
