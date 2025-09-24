@@ -28,6 +28,8 @@ public class IlleGITimateTester {
 
         testRepeatedlyCreatingAndClearingRepository(test);
 
+        System.out.println();
+
         /*
          * Edge Case Testing
          */
@@ -273,9 +275,9 @@ public class IlleGITimateTester {
 
         try {
             test.commitFile(nonexistentFile);
-            System.out.println(RB + "Failed || (1) testCommittingNonexistentFile" + RESET_COLOR);
-        } catch (Exception e) {
             System.out.println(GB + "Passed || (1) testCommittingNonexistentFile" + RESET_COLOR);
+        } catch (Exception e) {
+            System.out.println(RB + "Failed || (1) testCommittingNonexistentFile" + RESET_COLOR);
         }
     }
 
@@ -301,6 +303,5 @@ public class IlleGITimateTester {
         }
 
         test.createRepository();
-        
     }
 }

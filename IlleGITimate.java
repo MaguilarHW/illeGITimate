@@ -102,6 +102,11 @@ public class IlleGITimate {
     // TODO: put a try-catch here?
     public void commitFile(File file) throws IOException {
 
+        if (!file.exists()) {
+            System.out.println("File does not exist; cannot commit");
+            return;
+        }
+
         String hash = generateSha1Hex(file);
         String pathname = file.getPath();
 
