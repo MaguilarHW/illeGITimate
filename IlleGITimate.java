@@ -152,8 +152,16 @@ public class IlleGITimate {
 
     // Stretch Goal #2: Include a way to reset test files (3%)
     public void clearRepository() throws IOException {
-        index.clear();
-        objects.deleteContents();
+        if (!isRepositoryHealthy()) {
+            System.out.println("Warning, repository in unhealthy state. Still clearing, though.");
+        }
+
+        if (index.exists()) {
+            index.clear();
+        }
+        if (objects.exists()) {
+            objects.deleteContents();
+        }
     }
 
     /*
@@ -162,9 +170,24 @@ public class IlleGITimate {
      * directories can only be deleted by Java if they are empty.
      */
     public boolean deleteRepository() {
-        index.delete();
-        objects.delete();
-        HEAD.delete();
+        if (!git.exists()) {
+            System.out.println("Repository already deleted.");
+            return false;
+        }
+
+        if (!isRepositoryHealthy()) {
+            System.out.println("Warning, repository in unhealthy state. Still deleting, though.");
+        }
+
+        if (index.exists()) {
+            index.delete();
+        }
+        if (objects.exists()) {
+            objects.delete();
+        }
+        if (HEAD.exists()) {
+            HEAD.delete();
+        }
         return git.delete();
     }
 
@@ -178,17 +201,34 @@ public class IlleGITimate {
     }
 
     /*
-     * This is for testing purposes and should NOT be used otherwise.
+     * This is mainly for testing
      */
     public Objects getObjects() {
         return objects;
     }
 
     /*
-     * This is for testing purposes and should NOT be used otherwise.
+     * This is mainly for testing
      */
     public Index getIndex() {
         return index;
+    }
+
+    /*
+     * Only use this if you delete the repository and want to recreate it with the
+     * same pathname for some reason. Otherwise, the constructor does the same job.
+     */
+    public void createRepository() throws IOException {
+        constructRepositoryPaths();
+
+        if (isRepositoryHealthy()) {
+            System.out.println("Git Repository Already Exists");
+        } else {
+            initializeRepository();
+            System.out.println("Git Repository Created");
+        }
+
+        index.sync();
     }
 
     // // Stretch Goal #2: Create a tester for blob creation and **verification**

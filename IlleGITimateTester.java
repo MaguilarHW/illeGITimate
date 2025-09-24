@@ -34,6 +34,10 @@ public class IlleGITimateTester {
 
         testCommittingNonexistentFile(test);
 
+        testClearingUnhealthyRepository(test);
+
+        testDeletingAlreadyDeletedRepository(test);
+
         // test.deleteRepository();
     }
 
@@ -238,17 +242,6 @@ public class IlleGITimateTester {
         test.clearRepository();
     }
 
-    public static void testCommittingNonexistentFile(IlleGITimate test) throws IOException {
-        File nonexistentFile = new File("thisisnotafile");
-
-        try {
-            test.commitFile(nonexistentFile);
-            System.out.println(RB + "Failed || (1) testCommittingNonexistentFile" + RESET_COLOR);
-        } catch (Exception e) {
-            System.out.println(GB + "Passed || (1) testCommittingNonexistentFile" + RESET_COLOR);
-        }
-    }
-
     public static void testRepeatedlyCreatingAndClearingRepository(IlleGITimate test) {
         try {
             File a = new File("testTextFiles/a.txt");
@@ -273,5 +266,41 @@ public class IlleGITimateTester {
         }
 
         System.out.println(GB + "Passed || (1) testRepeatedlyCreatingAndClearingRepository" + RESET_COLOR);
+    }
+
+    public static void testCommittingNonexistentFile(IlleGITimate test) throws IOException {
+        File nonexistentFile = new File("thisisnotafile");
+
+        try {
+            test.commitFile(nonexistentFile);
+            System.out.println(RB + "Failed || (1) testCommittingNonexistentFile" + RESET_COLOR);
+        } catch (Exception e) {
+            System.out.println(GB + "Passed || (1) testCommittingNonexistentFile" + RESET_COLOR);
+        }
+    }
+
+    public static void testClearingUnhealthyRepository(IlleGITimate test) throws IOException {
+        test.deleteRepository();
+        try {
+            test.clearRepository();
+            System.out.println(GB + "Passed || (1) testClearingUnhealthyRepository" + RESET_COLOR);
+        } catch (Exception e) {
+            System.out.println(RB + "Failed || (1) testClearingUnhealthyRepository" + RESET_COLOR);
+        }
+        test.createRepository();
+    }
+
+    public static void testDeletingAlreadyDeletedRepository(IlleGITimate test) throws IOException {
+       
+        try {
+            test.deleteRepository();
+            test.deleteRepository();
+            System.out.println(GB + "Passed || (1) testDeletingAlreadyDeletedRepository" + RESET_COLOR);
+        } catch (Exception e) {
+            System.out.println(RB + "Failed || (1) testDeletingAlreadyDeletedRepository" + RESET_COLOR);
+        }
+
+        test.createRepository();
+        
     }
 }
