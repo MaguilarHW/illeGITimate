@@ -55,11 +55,11 @@ public class IlleGITimateTester {
     }
 
     public static void testCommittingNewTextFiles(IlleGITimate test) throws IOException {
-        File a = new File("testTextFiles/a.txt");
-        File b = new File("testTextFiles/b.txt");
-        File c = new File("testTextFiles/c.txt");
-        File d = new File("testTextFiles/d.txt");
-        File sampleText = new File("testTextFiles/sampleText.txt");
+        File a = new File("testTextFiles" + File.separator + "a.txt");
+        File b = new File("testTextFiles" + File.separator + "b.txt");
+        File c = new File("testTextFiles" + File.separator + "c.txt");
+        File d = new File("testTextFiles" + File.separator + "d.txt");
+        File sampleText = new File("testTextFiles" + File.separator + "sampleText.txt");
         File[] files = { a, b, c, d, sampleText };
         String[] contents = new String[files.length];
         String[] hashes = new String[files.length];
@@ -141,7 +141,7 @@ public class IlleGITimateTester {
     }
 
     public static void testClearingRepository(IlleGITimate test) throws IOException {
-        File a = new File("testTextFiles/a.txt");
+        File a = new File("testTextFiles" + File.separator + "a.txt");
         test.commitFile(a);
         test.clearRepository();
         if (test.getIndex().getNumberOfEntries() == 0 && test.getObjects().listFiles().length == 0) {
@@ -152,17 +152,17 @@ public class IlleGITimateTester {
     }
 
     public static void testCommittingDuplicateTextFiles(IlleGITimate test) throws IOException {
-        File a = new File("testTextFiles/a.txt");
-        File b = new File("testTextFiles/b.txt");
-        File c = new File("testTextFiles/c.txt");
-        File d = new File("testTextFiles/d.txt");
-        File sampleText = new File("testTextFiles/sampleText.txt");
+        File a = new File("testTextFiles" + File.separator + "a.txt");
+        File b = new File("testTextFiles" + File.separator + "b.txt");
+        File c = new File("testTextFiles" + File.separator + "c.txt");
+        File d = new File("testTextFiles" + File.separator + "d.txt");
+        File sampleText = new File("testTextFiles" + File.separator + "sampleText.txt");
 
         // Remember that these are duplicates (in contents) of the other files
-        File a2 = new File("testTextFiles/a2.txt");
-        File b2 = new File("testTextFiles/b2.txt");
-        File c2 = new File("testTextFiles/c2.txt");
-        File d2 = new File("testTextFiles/d2.txt");
+        File a2 = new File("testTextFiles" + File.separator + "a2.txt");
+        File b2 = new File("testTextFiles" + File.separator + "b2.txt");
+        File c2 = new File("testTextFiles" + File.separator + "c2.txt");
+        File d2 = new File("testTextFiles" + File.separator + "d2.txt");
         File[] files = { a, b, c, d, sampleText, a2, b2, c2, d2 };
         File[] originals = { a, b, c, d, sampleText };
         String[] contents = new String[files.length];
@@ -246,11 +246,11 @@ public class IlleGITimateTester {
 
     public static void testRepeatedlyCreatingAndClearingRepository(IlleGITimate test) {
         try {
-            File a = new File("testTextFiles/a.txt");
-            File b = new File("testTextFiles/b.txt");
-            File c = new File("testTextFiles/c.txt");
-            File d = new File("testTextFiles/d.txt");
-            File sampleText = new File("testTextFiles/sampleText.txt");
+            File a = new File("testTextFiles" + File.separator + "a.txt");
+            File b = new File("testTextFiles" + File.separator + "b.txt");
+            File c = new File("testTextFiles" + File.separator + "c.txt");
+            File d = new File("testTextFiles" + File.separator + "d.txt");
+            File sampleText = new File("testTextFiles" + File.separator + "sampleText.txt");
             File[] files = { a, b, c, d, sampleText };
 
             // creates and removes files 100 times lol
@@ -293,7 +293,7 @@ public class IlleGITimateTester {
     }
 
     public static void testDeletingAlreadyDeletedRepository(IlleGITimate test) throws IOException {
-       
+
         try {
             test.deleteRepository();
             test.deleteRepository();

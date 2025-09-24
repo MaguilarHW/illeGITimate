@@ -52,7 +52,7 @@ public class Objects {
      */
     public void addFile(File file) throws IOException {
         String hash = generateSha1Hex(file);
-        File objectsFile = new File(objects.getPath() + "/" + hash);
+        File objectsFile = new File(objects.getPath() + File.separator + hash);
 
         // logic to copy stuff from file to objectsFile
         // sleek!

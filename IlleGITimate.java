@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -53,7 +52,7 @@ public class IlleGITimate {
      * subfolder "test", for example.
      */
     public IlleGITimate(String pathname) throws IOException {
-        this.pathname = pathname + "/";
+        this.pathname = pathname + File.separator;
 
         constructRepositoryPaths();
 
@@ -129,9 +128,9 @@ public class IlleGITimate {
      */
     private void constructRepositoryPaths() throws IOException {
         git = new Git(pathname + "git");
-        objects = new Objects(pathname + "git/objects");
-        index = new Index(pathname + "git/index");
-        HEAD = new Head(pathname + "git/HEAD");
+        objects = new Objects(pathname + "git" + File.separator + "objects");
+        index = new Index(pathname + "git" + File.separator + "index");
+        HEAD = new Head(pathname + "git" + File.separator + "HEAD");
     }
 
     /*
