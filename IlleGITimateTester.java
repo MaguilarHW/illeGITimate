@@ -14,6 +14,7 @@ public class IlleGITimateTester {
     public static void main(String[] args) throws IOException {
         // git/objects/ needs to be clear before doing any tests
         IlleGITimate test = new IlleGITimate();
+        test.clearRepository();
 
         /*
          * Normal Behavior Tests

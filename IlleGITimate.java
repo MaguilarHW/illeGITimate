@@ -11,6 +11,7 @@ import components.Objects;
 
 public class IlleGITimate {
 
+    // not currently in use
     private boolean compress = false;
 
     // Using String instead of Path because of empty behavior
@@ -20,7 +21,7 @@ public class IlleGITimate {
     private Git git;
     private Objects objects;
 
-    // Both of these are files
+    // These are files
     private Index index;
     private Head HEAD;
 
@@ -117,7 +118,6 @@ public class IlleGITimate {
         // Cases 2, 3, 4:
         index.addFile(file);
         objects.addFile(file);
-
     }
 
     /*
@@ -234,24 +234,4 @@ public class IlleGITimate {
 
         index.sync();
     }
-
-    // // Stretch Goal #2: Create a tester for blob creation and **verification**
-    // (7%)
-    // // Blob creation is handled using saveFileToObjectsDirectory()
-    // public boolean verifySyncBetweenIndexAndObjectsDirectory() throws IOException
-    // {
-    // // Verifying sync means AT LEAST every file in index is in git/objects/
-    // // Maybe this isn't good
-    // initializeStoredFilesFromIndex();
-
-    // List<File> filesInObjects = Arrays.asList(objects.listFiles());
-
-    // for (String hash : storedFiles.values()) {
-    // System.out.println("Checking existence of " + objects.getAbsolutePath() + "/"
-    // + hash);
-    // if (filesInObjects.contains(filesInObjects)) {
-
-    // }
-    // }
-    // }
 }

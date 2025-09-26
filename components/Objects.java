@@ -54,6 +54,8 @@ public class Objects {
         String hash = generateSha1Hex(file);
         File objectsFile = new File(objects.getPath() + File.separator + hash);
 
+        //TODO: compression would go here
+
         // logic to copy stuff from file to objectsFile
         // sleek!
         FileOutputStream fos = new FileOutputStream(objectsFile);
