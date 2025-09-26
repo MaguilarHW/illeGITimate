@@ -247,9 +247,7 @@ public class IlleGITimateTester {
         test.clearRepository();
     }
 
-    /*
-     * Checking if the contents match is too hard for this test cus its a byte array
-     */
+    // Checking if the contents match is too hard for this test cus its a byte array
     public static void testCommittingImages(IlleGITimate test) throws IOException {
         File a = new File("testImages" + File.separator + "a.jpg");
         File b = new File("testImages" + File.separator + "b.jpg");
