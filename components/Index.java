@@ -74,7 +74,7 @@ public class Index {
      * someone, download the jar files from Google
      */
     private String generateSha1Hex(File file) throws IOException {
-        return DigestUtils.sha1Hex(Files.readString(file.toPath()));
+        return DigestUtils.sha1Hex(Files.readAllBytes(file.toPath()));
     }
 
     /*

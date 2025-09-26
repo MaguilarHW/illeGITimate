@@ -27,6 +27,8 @@ public class IlleGITimateTester {
 
         testCommittingDuplicateTextFiles(test);
 
+        testCommittingNewImages(test);
+
         testRepeatedlyCreatingAndClearingRepository(test);
 
         System.out.println();
@@ -238,6 +240,75 @@ public class IlleGITimateTester {
             }
             if (i == files.length - 1) {
                 System.out.println(GB + "Passed || (6) testCommittingDuplicateFiles" + RESET_COLOR);
+            }
+        }
+
+        // Cleans the repository so that the next test can use it
+        test.clearRepository();
+    }
+
+    // Checking if the contents match is too hard for this test cus its a byte array
+    public static void testCommittingNewImages(IlleGITimate test) throws IOException {
+        File a = new File("testImages" + File.separator + "a.jpg");
+        File b = new File("testImages" + File.separator + "b.jpg");
+        File c = new File("testImages" + File.separator + "c.jpg");
+        File d = new File("testImages" + File.separator + "d.jpg");
+
+        File[] files = { a, b, c, d };
+        String[] hashes = new String[files.length];
+
+        for (int i = 0; i < files.length; i++) {
+            hashes[i] = DigestUtils.sha1Hex(Files.readAllBytes(files[i].toPath()));
+        }
+
+        for (File file : files) {
+            test.commitFile(file);
+        }
+
+        // (1) Checks if the right number of files were put in objects directory
+        if (test.getObjects().listFiles().length == files.length) {
+            System.out.println(GB + "Passed || (1) testCommittingImages" + RESET_COLOR);
+        } else {
+            System.out.println(RB + "Failed || (1) testCommittingImages" + RESET_COLOR);
+        }
+
+        // (2) Checks to see if the created files have the right hashed names
+        for (int i = 0; i < hashes.length; i++) {
+            if (!Arrays.asList(test.getObjects().list()).contains(hashes[i])) {
+                System.out.println(RB + "Failed || (2) testCommittingImages" + RESET_COLOR);
+                break;
+            }
+            if (i == hashes.length - 1) {
+                System.out.println(GB + "Passed || (2) testCommittingImages" + RESET_COLOR);
+            }
+        }
+
+        // (3) Checks to see if the index has the right number of entries
+        if (test.getIndex().getNumberOfEntries() == files.length) {
+            System.out.println(GB + "Passed || (4) testCommittingImages" + RESET_COLOR);
+        } else {
+            System.out.println(RB + "Failed || (4) testCommittingImages" + RESET_COLOR);
+        }
+
+        // (4) Checks to see if the index has all the path names in it
+        for (int i = 0; i < files.length; i++) {
+            if (!test.getIndex().containsPath(files[i].getPath())) {
+                System.out.println(RB + "Failed || (5) testCommittingImages" + RESET_COLOR);
+                break;
+            }
+            if (i == files.length - 1) {
+                System.out.println(GB + "Passed || (5) testCommittingImages" + RESET_COLOR);
+            }
+        }
+
+        // (5) Checks to see if the index has all the hashes in it
+        for (int i = 0; i < files.length; i++) {
+            if (!test.getIndex().containsHash(files[i].getPath(), hashes[i])) {
+                System.out.println(RB + "Failed || (6) testCommittingImages" + RESET_COLOR);
+                break;
+            }
+            if (i == files.length - 1) {
+                System.out.println(GB + "Passed || (6) testCommittingImages" + RESET_COLOR);
             }
         }
 
