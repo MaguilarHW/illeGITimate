@@ -27,7 +27,7 @@ public class IlleGITimateTester {
 
         testCommittingDuplicateTextFiles(test);
 
-        testCommittingImages(test);
+        testCommittingNewImages(test);
 
         testRepeatedlyCreatingAndClearingRepository(test);
 
@@ -248,7 +248,7 @@ public class IlleGITimateTester {
     }
 
     // Checking if the contents match is too hard for this test cus its a byte array
-    public static void testCommittingImages(IlleGITimate test) throws IOException {
+    public static void testCommittingNewImages(IlleGITimate test) throws IOException {
         File a = new File("testImages" + File.separator + "a.jpg");
         File b = new File("testImages" + File.separator + "b.jpg");
         File c = new File("testImages" + File.separator + "c.jpg");
