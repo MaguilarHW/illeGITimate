@@ -79,12 +79,10 @@ public class Index {
 
     /*
      * Remember that storedFiles is the run-time representation of the index file.
-     * This is useful when running the program when an index already exists. This
-     * also allows the HashMap to be filled with Files using the data within index.
-     * 41 is the length of the hash.
+     * This method is called when running the program when an index already exists.
+     * This allows the HashMap to be filled with Files using the data within index.
      * 
-     * TODO: technically this doesn't do anything if we try and remove things or
-     * clear
+     * 41 is the length of the hash.
      */
     public void sync() throws IOException {
         numberOfEntries = 0;
@@ -97,6 +95,7 @@ public class Index {
             storedFiles.put(pathname, hash);
             numberOfEntries += 1;
         }
+
         br.close();
     }
 

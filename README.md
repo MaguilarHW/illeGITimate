@@ -203,6 +203,7 @@ Now that you've read everything above and (hopefully) understand the basics of h
 4. Don't worry about messing with `lib`, those are just `.jar` files that let `generateSha1Hex(){}` work. If you want to add more dependencies, drop the `.jar` files in there.
 5. This entire project only works for files with UTC-8 text within them. Maybe you wanna make it work for images?? :D
 6. Consider using the non-default constructor for testing.
+7. Please use `File.separator` instead of `/` within paths to ensure cross-compatibility going forward
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
