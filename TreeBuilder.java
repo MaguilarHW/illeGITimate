@@ -21,23 +21,26 @@ public class TreeBuilder {
     public Index index;
 
     public TreeBuilder(File repoRoot, Index index) throws IOException {
+        // use the parameter (correct name) to initialize the field
         this.repoRoot = repoRoot.getCanonicalFile();
-        this.objectsDir = new File(repoRoot, "git" + File.separator + "objects");
-        this.workingListFile = new File(repoRoot, "git" + File.separator + "working_list");
+        this.objectsDir = new File(this.repoRoot, "git" + File.separator + "objects");
+        this.workingListFile = new File(this.repoRoot, "git" + File.separator + "working_list");
         this.index = index;
 
-        if (!objectsDir.isDirectory()) throw new IOException("Objects directory not found at " + objectsDir.getAbsolutePath());
+        if (!objectsDir.isDirectory()) {
+            throw new IOException("Objects directory not found at " + objectsDir.getAbsolutePath());
+        }
 
         // Make sure that the list file actually exists (3.1 req)
         if (!workingListFile.exists()) workingListFile.createNewFile();
 
-
         // Clear the working list file
-        try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(workingListFile, false), StandardCharsets.UTF_8))) {
+        try (BufferedWriter w = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(workingListFile, false), StandardCharsets.UTF_8))) {
             // start empty
         }
     }
+
 
     /**
      * Milestone 3.0/3.1:
@@ -128,21 +131,31 @@ public class TreeBuilder {
     /**
      * From here are random helpers
      */
-    public static String unixify(String p) { return p.replace(File.separatorChar, '/'); }
+    // --- helpers (paste these three methods exactly) ---
+
+    public static String unixify(String p) {
+        return p.replace(File.separatorChar, '/');
+    }
 
     // Works with Miles' code dw
-    private String hashBytes(byte[] data) throws IOException { return DigestUtils.sha1Hex(data); }
+    public String hashBytes(byte[] data) throws IOException {
+        return DigestUtils.sha1Hex(data);
+    }
 
     public void writeObjectIfMissing(String sha, byte[] data) throws IOException {
         File out = new File(objectsDir, sha);
         if (out.exists()) return;
-        try (FileOutputStream fos = new FileOutputStream(out)) fos.write(data);
+
+        // Correct try-with-resources: one closing ')' and a block with { ... }
+        try (FileOutputStream fos = new FileOutputStream(out)) {
+            fos.write(data);
+        }
     }
 
     public void appendWorkingListLine(String type, String sha, String relPath) throws IOException {
         // Append one line per spec. keep UNIX-style separators and NO trailing spaces.
-        try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new
-                FileOutputStream(workingListFile, true), StandardCharsets.UTF_8))) {
+        try (BufferedWriter w = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(workingListFile, true), StandardCharsets.UTF_8))) {
 
             // If file is empty we just write the line. Else always add a newline first
             long len = workingListFile.length();
@@ -157,7 +170,7 @@ public class TreeBuilder {
     }
 
     // Milestone 3.0/3.1:
-    // Tree entries are "blob <SHA1> <name>" or "tree <SHA1> <name>"!!!!!
+    // Tree entries are "blob <SHA1> <name>" or "tree <SHA1> <name>"
     public static class Entry {
         String type; // "blob" or "tree"
         String sha;
