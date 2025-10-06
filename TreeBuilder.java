@@ -131,22 +131,31 @@ public class TreeBuilder {
     /**
      * From here are random helpers
      */
-    public static String unixify(String p) { return p.replace(File.separatorChar, '/'); }
+    // --- helpers (paste these three methods exactly) ---
+
+    public static String unixify(String p) {
+        return p.replace(File.separatorChar, '/');
+    }
 
     // Works with Miles' code dw
-    private String hashBytes(byte[] data) throws IOException { return DigestUtils.sha1Hex(data); }
+    publid String hashBytes(byte[] data) throws IOException {
+        return DigestUtils.sha1Hex(data);
+    }
 
     public void writeObjectIfMissing(String sha, byte[] data) throws IOException {
         File out = new File(objectsDir, sha);
         if (out.exists()) return;
-        try (FileOutputStream fos = new FileOutputStream(out)) fos.write(data);
-    }
 
+        // Correct try-with-resources: one closing ')' and a block with { ... }
+        try (FileOutputStream fos = new FileOutputStream(out)) {
+            fos.write(data);
+        }
+    }
 
     public void appendWorkingListLine(String type, String sha, String relPath) throws IOException {
         // Append one line per spec. keep UNIX-style separators and NO trailing spaces.
-        try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new
-                FileOutputStream(workingListFile, true), StandardCharsets.UTF_8))) {
+        try (BufferedWriter w = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(workingListFile, true), StandardCharsets.UTF_8))) {
 
             // If file is empty we just write the line. Else always add a newline first
             long len = workingListFile.length();
