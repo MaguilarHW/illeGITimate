@@ -138,7 +138,7 @@ public class TreeBuilder {
     }
 
     // Works with Miles' code dw
-    publid String hashBytes(byte[] data) throws IOException {
+    public String hashBytes(byte[] data) throws IOException {
         return DigestUtils.sha1Hex(data);
     }
 
