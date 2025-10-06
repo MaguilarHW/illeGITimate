@@ -139,8 +139,9 @@ public class TreeBuilder {
     public void writeObjectIfMissing(String sha, byte[] data) throws IOException {
         File out = new File(objectsDir, sha);
         if (out.exists()) return;
-        try (FileOutputStream fos = new FileOutputStream(out))) fos.write(data);
+        try (FileOutputStream fos = new FileOutputStream(out)) fos.write(data);
     }
+
 
     public void appendWorkingListLine(String type, String sha, String relPath) throws IOException {
         // Append one line per spec. keep UNIX-style separators and NO trailing spaces.
